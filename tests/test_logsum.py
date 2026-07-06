@@ -7,8 +7,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-import pytest
-
 from conftest import make_csv
 
 ENTRY = Path(__file__).parent.parent / "src" / "logsum.py"
