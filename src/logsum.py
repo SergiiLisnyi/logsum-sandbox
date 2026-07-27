@@ -18,6 +18,10 @@ def _warn(msg, quiet):
         print(msg, file=sys.stderr)
 
 
+def _make_group(ts):
+    return {"count": 0, "first_seen": ts, "last_seen": ts}
+
+
 def summarise(input_path, output_path, quiet):
     try:
         fh = open(input_path, newline="", encoding="utf-8")  # noqa: SIM115
@@ -44,10 +48,7 @@ def summarise(input_path, output_path, quiet):
 
             service = row.get("service", "").strip()
             key = (service, level)
-
-            if key not in groups:
-                groups[key] = {"count": 0, "first_seen": ts, "last_seen": ts}
-            g = groups[key]
+            g = groups.setdefault(key, _make_group(ts))
             g["count"] += 1
             g["first_seen"] = min(g["first_seen"], ts)
             g["last_seen"] = max(g["last_seen"], ts)
