@@ -7,8 +7,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-import pytest
-
 from conftest import make_csv
 
 ENTRY = Path(__file__).parent.parent / "src" / "logsum.py"
@@ -21,6 +19,7 @@ def run_cli(*args):
         [sys.executable, str(ENTRY), *args],
         capture_output=True,
         text=True,
+        check=False,
     )
     return result.returncode, result.stdout, result.stderr
 
