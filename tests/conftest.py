@@ -3,6 +3,7 @@ Shared fixtures and helpers for logsum tests.
 All CSV construction is done programmatically via tmp_path — no static files needed.
 """
 import csv
+
 import pytest
 
 

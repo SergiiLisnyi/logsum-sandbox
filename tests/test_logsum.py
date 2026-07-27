@@ -19,6 +19,7 @@ def run_cli(*args):
         [sys.executable, str(ENTRY), *args],
         capture_output=True,
         text=True,
+        check=False,
     )
     return result.returncode, result.stdout, result.stderr
 

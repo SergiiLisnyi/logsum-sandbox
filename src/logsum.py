@@ -3,7 +3,6 @@ import csv
 import sys
 from datetime import datetime
 
-
 OUTPUT_COLUMNS = ["service", "level", "count", "first_seen", "last_seen"]
 
 
@@ -21,7 +20,7 @@ def _warn(msg, quiet):
 
 def summarise(input_path, output_path, quiet):
     try:
-        fh = open(input_path, newline="", encoding="utf-8")
+        fh = open(input_path, newline="", encoding="utf-8")  # noqa: SIM115
     except FileNotFoundError:
         print(f"ERROR: input file not found: {input_path}", file=sys.stderr)
         sys.exit(1)
@@ -50,10 +49,8 @@ def summarise(input_path, output_path, quiet):
                 groups[key] = {"count": 0, "first_seen": ts, "last_seen": ts}
             g = groups[key]
             g["count"] += 1
-            if ts < g["first_seen"]:
-                g["first_seen"] = ts
-            if ts > g["last_seen"]:
-                g["last_seen"] = ts
+            g["first_seen"] = min(g["first_seen"], ts)
+            g["last_seen"] = max(g["last_seen"], ts)
 
     if total == 0:
         _warn("NOTICE: input contained no data rows", quiet)
@@ -85,7 +82,7 @@ def main():
         summarise(args.input, args.output, args.quiet)
     except SystemExit:
         raise
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         print(f"ERROR: {exc}", file=sys.stderr)
         sys.exit(2)
 
