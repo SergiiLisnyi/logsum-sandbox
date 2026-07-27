@@ -336,3 +336,36 @@ class TestCLIFlags:
         out = tmp_path / "summary.csv"
         _, _, stderr = run_cli("--input", str(inp), "--output", str(out))
         assert stderr.count("WARNING") >= 2
+
+
+# ── §8  --min-count flag ──────────────────────────────────────────────────────
+
+class TestMinCount:
+    def test_groups_below_threshold_excluded(self, tmp_path, happy_input):
+        """Groups with count < N are excluded from output."""
+        out = tmp_path / "summary.csv"
+        run_cli("--input", str(happy_input), "--output", str(out), "--min-count", "2")
+        rows = read_summary(out)
+        # happy_input: checkout-service INFO=2, checkout-service ERROR=1,
+        #              cart-api INFO=1, cart-api ERROR=2
+        # --min-count 2 keeps only count>=2: checkout-service INFO and cart-api ERROR
+        counts = {(r["service"], r["level"]): int(r["count"]) for r in rows}
+        assert ("checkout-service", "ERROR") not in counts
+        assert ("cart-api", "INFO") not in counts
+        assert counts[("checkout-service", "INFO")] == 2
+        assert counts[("cart-api", "ERROR")] == 2
+
+    def test_default_min_count_keeps_all_groups(self, tmp_path, happy_input):
+        """Default --min-count 1 keeps all groups (regression: behaviour unchanged)."""
+        out_default = tmp_path / "default.csv"
+        out_explicit = tmp_path / "explicit.csv"
+        run_cli("--input", str(happy_input), "--output", str(out_default))
+        run_cli("--input", str(happy_input), "--output", str(out_explicit), "--min-count", "1")
+        assert read_summary(out_default) == read_summary(out_explicit)
+
+    def test_min_count_zero_keeps_all_groups(self, tmp_path, happy_input):
+        """--min-count 0 keeps all groups (0 < any positive count)."""
+        out = tmp_path / "summary.csv"
+        run_cli("--input", str(happy_input), "--output", str(out), "--min-count", "0")
+        keys = {(r["service"], r["level"]) for r in read_summary(out)}
+        assert len(keys) == 4  # all four groups present

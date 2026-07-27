@@ -22,7 +22,7 @@ def _make_group(ts):
     return {"count": 0, "first_seen": ts, "last_seen": ts}
 
 
-def summarise(input_path, output_path, quiet):
+def summarise(input_path, output_path, quiet, min_count=1):
     try:
         fh = open(input_path, newline="", encoding="utf-8")  # noqa: SIM115
     except FileNotFoundError:
@@ -64,6 +64,8 @@ def summarise(input_path, output_path, quiet):
         writer = csv.DictWriter(out, fieldnames=OUTPUT_COLUMNS)
         writer.writeheader()
         for (service, level), g in groups.items():
+            if g["count"] < min_count:
+                continue
             writer.writerow({
                 "service": service,
                 "level": level,
@@ -78,9 +80,11 @@ def main():
     parser.add_argument("--input", default="data/events.csv", metavar="PATH")
     parser.add_argument("--output", default="data/summary.csv", metavar="PATH")
     parser.add_argument("--quiet", action="store_true")
+    parser.add_argument("--min-count", type=int, default=1, metavar="N",
+                        help="only output groups with count >= N (default: 1)")
     args = parser.parse_args()
     try:
-        summarise(args.input, args.output, args.quiet)
+        summarise(args.input, args.output, args.quiet, min_count=args.min_count)
     except SystemExit:
         raise
     except Exception as exc:  # noqa: BLE001

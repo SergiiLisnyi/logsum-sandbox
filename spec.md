@@ -73,3 +73,11 @@ Exit codes:
 
 ## Signed off
 Sergii_Lisnyi — 2026-07-05
+
+## §8 — --min-count flag
+
+`--min-count N` (integer, default 1) filters the output: only groups whose
+`count >= N` are written to the summary CSV. Groups below the threshold are
+silently excluded; all parsing, normalisation, and warning behaviour is
+unchanged. `--min-count 0` or `--min-count 1` produce identical output to the
+unflagged run.
